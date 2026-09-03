@@ -1,0 +1,6 @@
+tick-seconds: 1
+messages:
+  prefix: "&5[MiraEvents]&r "
+  countdown: "&e%event% &7starts in &f%seconds%s&7."
+  started: "&a%event% &7has started!"
+  ended: "&c%event% &7has ended."
