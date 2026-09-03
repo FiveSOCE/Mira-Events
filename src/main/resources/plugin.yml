@@ -1,0 +1,19 @@
+name: MiraEvents
+version: ${version}
+main: com.mira.events.MiraEventsPlugin
+api-version: '1.21'
+authors: [FiveS]
+description: Central scheduled event controller for the Mira plugin ecosystem.
+softdepend: [PlaceholderAPI, MiraCore, MiraShop, MiraKits, MiraItems, MiraTags, MiraCrates, MiraPinata, MiraNPC]
+
+commands:
+  miraevent:
+    description: MiraEvents administration and status.
+    aliases: [mevent, mevents]
+    usage: /mevent <list|info|start|stop|reload>
+
+permissions:
+  miraevents.use:
+    default: true
+  miraevents.admin:
+    default: op
