@@ -1,39 +1,46 @@
 # MiraEvents
 
-Central scheduled event controller for the Mira Paper 1.21.11 / Java 21 plugin suite.
+MiraEvents is the central scheduled-event controller for the Mira Paper server suite. It manages recurring and manually triggered server events, countdowns, persistent event state, and command chains that can coordinate other Mira plugins.
 
 ## Download
 
-Current release: **v0.1.0**
-
 [**Download MiraEvents v0.1.0**](https://github.com/FiveSOCE/Mira-Events/releases/download/v0.1.0/MiraEvents-0.1.0.jar)
 
-[View all releases](https://github.com/FiveSOCE/Mira-Events/releases)
-
-## Features
-
-- scheduled and recurring events
-- persistent active/next-start state
-- configurable countdown broadcasts
-- console command chains on event start/end
-- manual `/mevent start <id>` and `/mevent stop <id>`
-- `/mevent list`, `/mevent info <id>`, `/mevent reload`
-- PlaceholderAPI for active/next event data
-- public `MiraEventsApi` through Bukkit ServicesManager
-- deliberately decoupled from other Mira plugins, so event command chains can trigger MiraShop sales, event kits/items/tags, Pinata events, seasonal crates, NPC states and future systems
-
-Definitions live in `plugins/MiraEvents/events.yml` and runtime schedule state in `plugins/MiraEvents/state.yml`.
-
-## Requirements
+## Requirements / Dependencies
 
 - Paper 1.21.11
 - Java 21
 - PlaceholderAPI optional
+- MiraCore optional integration
+- MiraShop optional integration
+- MiraKits optional integration
+- MiraItems optional integration
+- MiraTags optional integration
+- MiraCrates optional integration
+- MiraPinata optional integration
+- MiraNPC optional integration
 
-## Building
+## How MiraEvents Works
 
-```bash
-gradle clean build
-```
+Event definitions are stored in `plugins/MiraEvents/events.yml`, while current/next runtime schedule state is stored in `plugins/MiraEvents/state.yml`. Events can be scheduled or recurring, broadcast countdowns before starting, execute console command chains on start/end, and expose active/next-event state through PlaceholderAPI and the public `MiraEventsApi`.
 
-Output: `build/libs/MiraEvents-0.1.0.jar`
+Because the event controller executes configured command chains instead of directly owning every event mechanic, it can trigger systems such as shops, kits, items, tags, crates, Pinata events, NPC states and future Mira modules without hard-coupling those plugins together.
+
+## Commands
+
+| Command | Permission | What it does |
+| --- | --- | --- |
+| `/mevent list` | `miraevents.use` | Lists configured/available events. |
+| `/mevent info <id>` | `miraevents.use` | Shows information and schedule state for an event. |
+| `/mevent start <id>` | `miraevents.admin` | Manually starts an event. |
+| `/mevent stop <id>` | `miraevents.admin` | Manually stops an active event. |
+| `/mevent reload` | `miraevents.admin` | Reloads MiraEvents configuration and definitions. |
+
+Aliases: `/miraevent`, `/mevents`
+
+## Permissions
+
+| Permission | Default | What it does |
+| --- | --- | --- |
+| `miraevents.use` | Everyone | Allows normal event status/list/info commands. |
+| `miraevents.admin` | OP | Allows starting, stopping and reloading events. |
