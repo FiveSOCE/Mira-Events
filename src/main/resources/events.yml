@@ -1,0 +1,14 @@
+events:
+  example-sale:
+    display-name: "Weekend Sale"
+    enabled: false
+    duration-seconds: 3600
+    first-start-at: 0
+    repeat-minutes: 0
+    countdown-seconds: [300, 60, 30, 10, 5, 4, 3, 2, 1]
+    start-broadcast: "&6Weekend Sale has begun!"
+    end-broadcast: "&7Weekend Sale has ended."
+    start-commands:
+      - "mshop sale start weekend 20 0 60 all"
+    end-commands:
+      - "mshop sale stop weekend"
