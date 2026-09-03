@@ -237,8 +237,8 @@ public final class MiraEventsPlugin extends JavaPlugin implements TabExecutor, M
     }
 
     private String key(String raw) { return raw == null ? "" : raw.toLowerCase(Locale.ROOT); }
-    private void msg(CommandSender sender, String raw) { sender.sendMessage(color(getConfig().getString("messages.prefix", "&5[MiraEvents]&r ") + raw)); }
-    private void broadcast(String raw) { Bukkit.broadcastMessage(color(raw)); }
+    private void msg(CommandSender sender, String raw) { sender.sendMessage(color(getConfig().getString("messages.prefix", "&5&lMira &8>> &r") + raw)); }
+    private void broadcast(String raw) { Bukkit.broadcastMessage(color("&5&lMira &8>> &r" + raw)); }
     private String color(String raw) { return ChatColor.translateAlternateColorCodes('&', raw == null ? "" : raw); }
     private static List<String> match(String prefix, Collection<String> values) { String lower = prefix.toLowerCase(Locale.ROOT); return values.stream().filter(v -> v.toLowerCase(Locale.ROOT).startsWith(lower)).sorted().toList(); }
 
