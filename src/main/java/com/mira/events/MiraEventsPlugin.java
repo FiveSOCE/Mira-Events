@@ -1,6 +1,11 @@
 package com.mira.events;
 
+import com.mira.core.api.MiraCore;
+import com.mira.core.api.MiraCoreProvider;
+import com.mira.core.api.ModuleHealth;
 import com.mira.events.api.MiraEventsApi;
+import com.mira.events.api.event.MiraEventStartedEvent;
+import com.mira.events.api.event.MiraEventStoppedEvent;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -19,6 +24,7 @@ import java.util.*;
 
 public final class MiraEventsPlugin extends JavaPlugin implements TabExecutor, MiraEventsApi {
     private final Map<String, EventDef> definitions = new LinkedHashMap<>();
+    private MiraCore core;
     private final Map<String, RuntimeState> states = new HashMap<>();
     private File eventsFile;
     private File stateFile;
@@ -28,6 +34,7 @@ public final class MiraEventsPlugin extends JavaPlugin implements TabExecutor, M
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        core = MiraCoreProvider.require();
         if (!new File(getDataFolder(), "events.yml").exists()) saveResource("events.yml", false);
         eventsFile = new File(getDataFolder(), "events.yml");
         stateFile = new File(getDataFolder(), "state.yml");
