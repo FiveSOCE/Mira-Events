@@ -127,6 +127,22 @@ public final class MiraEventsPlugin extends JavaPlugin implements TabExecutor, M
     }
 
     @Override public Set<String> eventIds() { return Collections.unmodifiableSet(new LinkedHashSet<>(definitions.keySet())); }
+    @Override public Set<String> activeEventIds() {
+        LinkedHashSet<String> active = new LinkedHashSet<>();
+        for (String id : definitions.keySet()) {
+            RuntimeState state = states.get(id);
+            if (state != null && state.active) active.add(id);
+        }
+        return Collections.unmodifiableSet(active);
+    }
+    @Override public Optional<String> nextEventId() {
+        EventDef next = nextEvent();
+        return next == null ? Optional.empty() : Optional.of(next.id());
+    }
+    @Override public Optional<String> displayName(String eventId) {
+        EventDef def = definitions.get(key(eventId));
+        return def == null ? Optional.empty() : Optional.of(def.displayName());
+    }
     @Override public boolean isActive(String eventId) { RuntimeState state = states.get(key(eventId)); return state != null && state.active; }
     @Override public OptionalLong activeUntil(String eventId) { RuntimeState state = states.get(key(eventId)); return state == null || !state.active ? OptionalLong.empty() : OptionalLong.of(state.activeUntil); }
     @Override public OptionalLong nextStart(String eventId) { RuntimeState state = states.get(key(eventId)); return state == null || state.nextStart <= 0 ? OptionalLong.empty() : OptionalLong.of(state.nextStart); }
