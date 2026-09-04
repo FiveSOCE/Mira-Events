@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -25,5 +29,18 @@ jobs:
       - name: Upload plugin jar
         uses: actions/upload-artifact@v4
         with:
-          name: MiraEvents-0.1.0
-          path: build/libs/MiraEvents-0.1.0.jar
+          name: MiraEvents-0.1.1
+          path: build/libs/MiraEvents-0.1.1.jar
+
+      - name: Publish v0.1.1 release if missing
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view v0.1.1 >/dev/null 2>&1; then
+            gh release create v0.1.1 \
+              build/libs/MiraEvents-0.1.1.jar \
+              --target "${{ github.sha }}" \
+              --title "MiraEvents v0.1.1" \
+              --notes "Adds MiraCore module/API registration and audit integration, typed start/stop lifecycle events and richer active/next event queries while preserving restart-safe scheduling and command-chain orchestration."
+          fi
