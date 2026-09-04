@@ -4,7 +4,8 @@ main: com.mira.events.MiraEventsPlugin
 api-version: '1.21'
 authors: [FiveS]
 description: Central scheduled event controller for the Mira plugin ecosystem.
-softdepend: [PlaceholderAPI, MiraCore, MiraShop, MiraKits, MiraItems, MiraTags, MiraCrates, MiraPinata, MiraNPC]
+depend: [MiraCore]
+softdepend: [PlaceholderAPI, MiraShop, MiraKits, MiraItems, MiraTags, MiraCrates, MiraPinata, MiraNPC]
 
 commands:
   miraevent:
