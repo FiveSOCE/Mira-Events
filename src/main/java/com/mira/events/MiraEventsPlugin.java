@@ -169,17 +169,25 @@ public final class MiraEventsPlugin extends JavaPlugin implements TabExecutor, M
         state.lastCountdown = -1;
         advanceNext(def, state, now);
         dispatch(def.startCommands());
+        getServer().getPluginManager().callEvent(
+                new MiraEventStartedEvent(def.id(), def.displayName(), manual, state.activeUntil));
+        core.audit().record("MiraEvents", manual ? "EVENT_STARTED_MANUAL" : "EVENT_STARTED_SCHEDULED",
+                null, "scheduler", def.id(), "Started event",
+                Map.of("displayName", def.displayName(), "activeUntil", Long.toString(state.activeUntil)));
         if (!def.startBroadcast().isBlank()) broadcast(def.startBroadcast());
         else broadcast(getConfig().getString("messages.started", "&a%event% &7has started!").replace("%event%", def.displayName()));
         saveState();
         return true;
     }
 
-    private boolean stopInternal(EventDef def, RuntimeState state, boolean announce) {
+    private boolean stopInternal(EventDef def, RuntimeState state, boolean announce, MiraEventStoppedEvent.Reason reason) {
         if (!state.active) return false;
         state.active = false;
         state.activeUntil = 0L;
         dispatch(def.endCommands());
+        getServer().getPluginManager().callEvent(new MiraEventStoppedEvent(def.id(), def.displayName(), reason));
+        core.audit().record("MiraEvents", "EVENT_STOPPED", null, "scheduler", def.id(), "Stopped event",
+                Map.of("displayName", def.displayName(), "reason", reason.name()));
         if (announce) {
             if (!def.endBroadcast().isBlank()) broadcast(def.endBroadcast());
             else broadcast(getConfig().getString("messages.ended", "&c%event% &7has ended.").replace("%event%", def.displayName()));
