@@ -1,10 +1,14 @@
 package com.mira.events.api;
 
+import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
 
 public interface MiraEventsApi {
     Set<String> eventIds();
+    Set<String> activeEventIds();
+    Optional<String> nextEventId();
+    Optional<String> displayName(String eventId);
     boolean isActive(String eventId);
     OptionalLong activeUntil(String eventId);
     OptionalLong nextStart(String eventId);
