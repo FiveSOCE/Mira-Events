@@ -109,7 +109,7 @@ public final class MiraEventsPlugin extends JavaPlugin implements TabExecutor, M
             RuntimeState state = states.get(def.id());
             if (state == null) continue;
             if (state.active && now >= state.activeUntil) {
-                stopInternal(def, state, true);
+                stopInternal(def, state, true, MiraEventStoppedEvent.Reason.DURATION_ELAPSED);
                 continue;
             }
             if (state.active || !def.enabled() || state.nextStart <= 0) continue;
@@ -158,7 +158,7 @@ public final class MiraEventsPlugin extends JavaPlugin implements TabExecutor, M
     public boolean stop(String eventId) {
         EventDef def = definitions.get(key(eventId));
         RuntimeState state = states.get(key(eventId));
-        return def != null && state != null && stopInternal(def, state, true);
+        return def != null && state != null && stopInternal(def, state, true, MiraEventStoppedEvent.Reason.MANUAL);
     }
 
     private boolean startInternal(EventDef def, RuntimeState state, boolean manual) {
