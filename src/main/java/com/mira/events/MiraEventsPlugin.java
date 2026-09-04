@@ -44,6 +44,10 @@ public final class MiraEventsPlugin extends JavaPlugin implements TabExecutor, M
         command.setExecutor(this);
         command.setTabCompleter(this);
         getServer().getServicesManager().register(MiraEventsApi.class, this, this, ServicePriority.Normal);
+        core.modules().register(this, "MiraEvents");
+        core.services().register(MiraEventsApi.class, this);
+        core.modules().setHealth(this, ModuleHealth.HEALTHY,
+                "Scheduled event state, command chains and typed lifecycle events ready");
         if (getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) new EventsExpansion().register();
 
         long ticks = Math.max(1L, getConfig().getLong("tick-seconds", 1L)) * 20L;
@@ -55,6 +59,10 @@ public final class MiraEventsPlugin extends JavaPlugin implements TabExecutor, M
     public void onDisable() {
         saveState();
         getServer().getServicesManager().unregisterAll(this);
+        if (core != null) {
+            core.services().unregister(MiraEventsApi.class, this);
+            core.modules().unregister(this);
+        }
     }
 
     private void reloadDefinitions() {
