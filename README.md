@@ -1,10 +1,12 @@
 # MiraEvents
 
-MiraEvents is the central scheduled-event controller for the Mira Paper server suite. It manages recurring and manually triggered server events, countdowns, persistent event state, and command chains that can coordinate other Mira plugins.
+MiraEvents is the central scheduled-event and server-operations controller for the Mira Paper server suite. It manages recurring/manually triggered gameplay events, rotating announcements, countdowns, persistent event state, command chains, and safe server restart scheduling.
 
 ## Download
 
-[**Download MiraEvents v0.1.1**](https://github.com/FiveSOCE/Mira-Events/releases/download/v0.1.1/MiraEvents-0.1.1.jar)
+[**Download MiraEvents v0.2.0**](https://github.com/FiveSOCE/Mira-Events/releases/download/v0.2.0/MiraEvents-0.2.0.jar)
+
+[View All Releases](https://github.com/FiveSOCE/Mira-Events/releases)
 
 ## Requirements / Dependencies
 
@@ -36,7 +38,11 @@ v0.1.1 registers MiraEvents and its API through MiraCore, writes event start/sto
 | `/mevent info <id>` | `miraevents.use` | Shows information and schedule state for an event. |
 | `/mevent start <id>` | `miraevents.admin` | Manually starts an event. |
 | `/mevent stop <id>` | `miraevents.admin` | Manually stops an active event. |
-| `/mevent reload` | `miraevents.admin` | Reloads MiraEvents configuration and definitions. |
+| `/mevent announce <message>` | `miraevents.admin` | Sends a manual Mira announcement. |
+| `/mevent restart status` | `miraevents.admin` | Shows the current restart schedule. |
+| `/mevent restart <duration> [reason]` | `miraevents.admin` | Schedules a safe restart using values such as `30s`, `10m`, `2h` or `1d`. |
+| `/mevent restart cancel` | `miraevents.admin` | Cancels the pending restart occurrence. |
+| `/mevent reload` | `miraevents.admin` | Reloads event, announcement and restart configuration. |
 
 Aliases: `/miraevent`, `/mevents`
 
@@ -56,3 +62,13 @@ Bukkit integrations may listen for:
 
 - `MiraEventStartedEvent` with event ID, display name, manual/scheduled source and active-until timestamp.
 - `MiraEventStoppedEvent` with event ID, display name and stop reason.
+
+## Announcements (0.2.0)
+
+MiraAnnouncements is folded into MiraEvents instead of becoming another JAR. Rotating announcements are configured under `announcements` and can render through MiraCore's shared CHAT, ACTION_BAR or TITLE notification channels. Chat announcements may include a click command and hover text. Automatic rotation is disabled by default until configured.
+
+## Safe Restarts (0.2.0)
+
+MiraRestart is folded into MiraEvents. Manual restart schedules support configurable countdown thresholds and reasons. Immediately before shutdown MiraEvents fires `MiraRestartPrepareEvent` so other modules can persist last-second state, then saves players and loaded worlds before requesting normal Bukkit shutdown.
+
+Optional automatic restart windows use a configurable IANA timezone and `HH:mm` times. They are disabled by default. The supplied default timezone is `Australia/Brisbane`.
