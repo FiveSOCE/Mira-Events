@@ -1,6 +1,40 @@
 tick-seconds: 1
+
 messages:
   prefix: '&5&lMira &8>> &r'
   countdown: "&e%event% &7starts in &f%seconds%s&7."
   started: "&a%event% &7has started!"
   ended: "&c%event% &7has ended."
+
+# Rotating announcements. Set enabled true when ready to use them.
+# CHAT entries may include click-command and hover text.
+announcements:
+  enabled: false
+  interval-seconds: 600
+  random-order: false
+  items:
+    welcome:
+      enabled: false
+      channel: CHAT
+      message: "&dWelcome to the Mira server."
+      subtitle: ""
+      click-command: ""
+      hover: ""
+
+# Safe server restart scheduling. MiraEvents performs save hooks, player/world saves,
+# countdown broadcasts, then requests a normal server shutdown.
+restart:
+  enabled: true
+  default-reason: "Scheduled restart"
+  save-before-shutdown: true
+  countdown-seconds: [1800, 600, 300, 60, 30, 10, 5, 4, 3, 2, 1]
+  messages:
+    countdown: "&eServer restart in &f%time%&e. &7%reason%"
+    cancelled: "&aScheduled server restart cancelled."
+    now: "&cServer restarting now. &7%reason%"
+  automatic:
+    enabled: false
+    timezone: "Australia/Brisbane"
+    reason: "Automatic scheduled restart"
+    times:
+      - "05:00"
