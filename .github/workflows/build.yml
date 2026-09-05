@@ -29,18 +29,18 @@ jobs:
       - name: Upload plugin jar
         uses: actions/upload-artifact@v4
         with:
-          name: MiraEvents-0.1.1
-          path: build/libs/MiraEvents-0.1.1.jar
+          name: MiraEvents-0.2.0
+          path: build/libs/MiraEvents-0.2.0.jar
 
-      - name: Publish v0.1.1 release if missing
+      - name: Publish v0.2.0 release if missing
         if: github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if ! gh release view v0.1.1 >/dev/null 2>&1; then
-            gh release create v0.1.1 \
-              build/libs/MiraEvents-0.1.1.jar \
+          if ! gh release view v0.2.0 >/dev/null 2>&1; then
+            gh release create v0.2.0 \
+              build/libs/MiraEvents-0.2.0.jar \
               --target "${{ github.sha }}" \
-              --title "MiraEvents v0.1.1" \
-              --notes "Adds MiraCore module/API registration and audit integration, typed start/stop lifecycle events and richer active/next event queries while preserving restart-safe scheduling and command-chain orchestration."
+              --title "MiraEvents v0.2.0" \
+              --notes "Merges MiraAnnouncements and MiraRestart into MiraEvents: configurable rotating chat/actionbar/title announcements with optional click/hover actions, manual announcements, safe restart countdowns, save hooks, typed pre-restart event, and optional timezone-aware automatic restart windows."
           fi
