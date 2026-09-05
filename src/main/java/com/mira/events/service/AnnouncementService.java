@@ -56,8 +56,6 @@ public final class AnnouncementService {
         Announcement announcement = new Announcement("manual", channel == null ? NotificationService.Channel.CHAT : channel,
                 message, "", "", "");
         send(announcement);
-        core.audit().record("MiraEvents", "ANNOUNCEMENT_MANUAL", null, "admin",
-                "announcement", "Manual announcement sent");
     }
 
     public int configuredCount() {
