@@ -3,9 +3,12 @@ package com.mira.events;
 import com.mira.core.api.MiraCore;
 import com.mira.core.api.MiraCoreProvider;
 import com.mira.core.api.ModuleHealth;
+import com.mira.core.api.NotificationService;
 import com.mira.events.api.MiraEventsApi;
 import com.mira.events.api.event.MiraEventStartedEvent;
 import com.mira.events.api.event.MiraEventStoppedEvent;
+import com.mira.events.service.AnnouncementService;
+import com.mira.events.service.RestartService;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -30,6 +33,8 @@ public final class MiraEventsPlugin extends JavaPlugin implements TabExecutor, M
     private File stateFile;
     private YamlConfiguration eventsConfig;
     private YamlConfiguration stateConfig;
+    private AnnouncementService announcements;
+    private RestartService restarts;
 
     @Override
     public void onEnable() {
@@ -39,6 +44,8 @@ public final class MiraEventsPlugin extends JavaPlugin implements TabExecutor, M
         eventsFile = new File(getDataFolder(), "events.yml");
         stateFile = new File(getDataFolder(), "state.yml");
         reloadDefinitions();
+        announcements = new AnnouncementService(this, core);
+        restarts = new RestartService(this, core);
 
         var command = Objects.requireNonNull(getCommand("miraevent"), "miraevent command missing");
         command.setExecutor(this);
@@ -47,7 +54,7 @@ public final class MiraEventsPlugin extends JavaPlugin implements TabExecutor, M
         core.modules().register(this, "MiraEvents");
         core.services().register(MiraEventsApi.class, this);
         core.modules().setHealth(this, ModuleHealth.HEALTHY,
-                "Scheduled event state, command chains and typed lifecycle events ready");
+                "Events, rotating announcements and safe restart scheduling ready");
         if (getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) new EventsExpansion().register();
 
         long ticks = Math.max(1L, getConfig().getLong("tick-seconds", 1L)) * 20L;
@@ -105,6 +112,8 @@ public final class MiraEventsPlugin extends JavaPlugin implements TabExecutor, M
 
     private void tick() {
         long now = System.currentTimeMillis();
+        if (announcements != null) announcements.tick(now);
+        if (restarts != null) restarts.tick(now);
         for (EventDef def : definitions.values()) {
             RuntimeState state = states.get(def.id());
             if (state == null) continue;
@@ -159,6 +168,23 @@ public final class MiraEventsPlugin extends JavaPlugin implements TabExecutor, M
         EventDef def = definitions.get(key(eventId));
         RuntimeState state = states.get(key(eventId));
         return def != null && state != null && stopInternal(def, state, true, MiraEventStoppedEvent.Reason.MANUAL);
+    }
+
+    @Override
+    public void announce(String message, NotificationService.Channel channel) {
+        announcements.announce(message, channel);
+    }
+
+    @Override public OptionalLong restartAt() { return restarts.restartAt(); }
+
+    @Override
+    public boolean scheduleRestart(long delaySeconds, String reason) {
+        return restarts.schedule(delaySeconds, reason, false);
+    }
+
+    @Override
+    public boolean cancelRestart() {
+        return restarts.cancel("api");
     }
 
     private boolean startInternal(EventDef def, RuntimeState state, boolean manual) {
@@ -252,26 +278,88 @@ public final class MiraEventsPlugin extends JavaPlugin implements TabExecutor, M
         if (args[0].equalsIgnoreCase("reload")) {
             reloadConfig();
             reloadDefinitions();
+            if (announcements != null) announcements.reload();
+            if (restarts != null) restarts.reload();
             msg(sender, "&aMiraEvents reloaded.");
             return true;
+        }
+
+        if (args[0].equalsIgnoreCase("announce")) {
+            if (args.length < 2) {
+                msg(sender, "&eUsage: /mevent announce <message>");
+                return true;
+            }
+            String message = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
+            announcements.announce(message, NotificationService.Channel.CHAT);
+            core.audit().record("MiraEvents", "ANNOUNCEMENT_MANUAL", sender instanceof org.bukkit.entity.Player p ? p.getUniqueId() : null,
+                    sender.getName(), "announcement", "Manual announcement sent");
+            return true;
+        }
+
+        if (args[0].equalsIgnoreCase("restart")) {
+            return restartCommand(sender, args);
         }
         if ((args[0].equalsIgnoreCase("start") || args[0].equalsIgnoreCase("stop")) && args.length >= 2) {
             boolean result = args[0].equalsIgnoreCase("start") ? start(args[1]) : stop(args[1]);
             msg(sender, result ? "&aEvent state changed." : "&cEvent could not be changed (unknown event or already in that state).");
             return true;
         }
-        msg(sender, "&eUsage: /mevent <list|info|start|stop|reload> [id]");
+        msg(sender, "&eUsage: /mevent <list|info|start|stop|announce|restart|reload> [args]");
         return true;
+    }
+
+    private boolean restartCommand(CommandSender sender, String[] args) {
+        if (args.length < 2 || args[1].equalsIgnoreCase("status")) {
+            OptionalLong at = restarts.restartAt();
+            if (at.isEmpty()) msg(sender, "&7No server restart is currently scheduled.");
+            else msg(sender, "&eRestart scheduled for &f" + new Date(at.getAsLong())
+                    + " &7(" + restarts.reason() + (restarts.automatic() ? ", automatic" : "") + "&7)");
+            return true;
+        }
+
+        if (args[1].equalsIgnoreCase("cancel")) {
+            msg(sender, restarts.cancel(sender.getName()) ? "&aRestart cancelled." : "&eNo restart is scheduled.");
+            return true;
+        }
+
+        long seconds = parseDurationSeconds(args[1]);
+        if (seconds <= 0L) {
+            msg(sender, "&cUse a duration such as 30s, 10m, 2h or 1d.");
+            return true;
+        }
+        String reason = args.length >= 3
+                ? String.join(" ", Arrays.copyOfRange(args, 2, args.length))
+                : getConfig().getString("restart.default-reason", "Scheduled restart");
+        boolean scheduled = restarts.schedule(seconds, reason, false);
+        msg(sender, scheduled ? "&aServer restart scheduled in &f" + args[1] + "&a." : "&cRestart scheduling is disabled.");
+        return true;
+    }
+
+    private long parseDurationSeconds(String raw) {
+        if (raw == null || raw.length() < 2) return -1L;
+        String clean = raw.trim().toLowerCase(Locale.ROOT);
+        long multiplier;
+        if (clean.endsWith("s")) multiplier = 1L;
+        else if (clean.endsWith("m")) multiplier = 60L;
+        else if (clean.endsWith("h")) multiplier = 3600L;
+        else if (clean.endsWith("d")) multiplier = 86400L;
+        else return -1L;
+        try {
+            return Math.multiplyExact(Long.parseLong(clean.substring(0, clean.length() - 1)), multiplier);
+        } catch (RuntimeException exception) {
+            return -1L;
+        }
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
             List<String> values = new ArrayList<>(List.of("list", "info"));
-            if (sender.hasPermission("miraevents.admin")) values.addAll(List.of("start", "stop", "reload"));
+            if (sender.hasPermission("miraevents.admin")) values.addAll(List.of("start", "stop", "announce", "restart", "reload"));
             return match(args[0], values);
         }
         if (args.length == 2 && List.of("info", "start", "stop").contains(args[0].toLowerCase(Locale.ROOT))) return match(args[1], definitions.keySet());
+        if (args.length == 2 && args[0].equalsIgnoreCase("restart")) return match(args[1], List.of("status", "cancel", "30s", "5m", "10m", "30m", "1h"));
         return List.of();
     }
 
