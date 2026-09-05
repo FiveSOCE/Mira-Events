@@ -3,7 +3,7 @@ version: ${version}
 main: com.mira.events.MiraEventsPlugin
 api-version: '1.21'
 authors: [FiveS]
-description: Central scheduled event controller for the Mira plugin ecosystem.
+description: Central Mira event, announcement and safe restart scheduler.
 depend: [MiraCore]
 softdepend: [PlaceholderAPI, MiraShop, MiraKits, MiraItems, MiraTags, MiraCrates, MiraPinata, MiraNPC]
 
@@ -11,7 +11,7 @@ commands:
   miraevent:
     description: MiraEvents administration and status.
     aliases: [mevent, mevents]
-    usage: /mevent <list|info|start|stop|reload>
+    usage: /mevent <list|info|start|stop|announce|restart|reload>
 
 permissions:
   miraevents.use:
