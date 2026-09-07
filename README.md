@@ -4,7 +4,7 @@ MiraEvents is the central scheduled-event and server-operations controller for t
 
 ## Download
 
-[**Download MiraEvents v0.2.0**](https://github.com/FiveSOCE/Mira-Events/releases/download/v0.2.0/MiraEvents-0.2.0.jar)
+[**Download MiraEvents v0.2.1**](https://github.com/FiveSOCE/Mira-Events/releases/download/v0.2.1/MiraEvents-0.2.1.jar)
 
 [View All Releases](https://github.com/FiveSOCE/Mira-Events/releases)
 
@@ -29,6 +29,18 @@ Event definitions are stored in `plugins/MiraEvents/events.yml`, while current/n
 Because the event controller executes configured command chains instead of directly owning every event mechanic, it can trigger systems such as shops, kits, items, tags, crates, Pinata events, NPC states and future Mira modules without hard-coupling those plugins together.
 
 v0.1.1 registers MiraEvents and its API through MiraCore, writes event start/stop actions to the Core audit trail and emits typed Bukkit `MiraEventStartedEvent` / `MiraEventStoppedEvent` lifecycle events for direct integrations that should not parse commands. The public API now also exposes active event IDs, the next scheduled event ID and display-name lookup while preserving restart-safe active/next state.
+
+
+## Prefilled Mira events (0.2.1)
+
+The default `events.yml` now includes four ready-to-run Mira ecosystem events:
+
+- **Enhanced Airdrops** — temporarily raises MiraAirdrops crate count to 35-50 and loot count to 3-5, starts an airdrop when possible, then restores the previous Airdrops settings when the event ends.
+- **Mega Pinata** — temporarily switches the Pinata to a fixed 750-hit boss, starts its countdown when possible, then restores its previous settings when the event ends.
+- **Mob Frenzy** — gives natural **and spawner-origin** hostile mobs a configurable chance to produce an additional spawn. Spawner-origin support is intentional because MiraSpawners can suppress ordinary natural hostile spawning.
+- **Harvest Rush** — growing Ageable crops have a configurable chance to receive one additional age step after a normal successful growth event.
+
+All four use the normal MiraEvents start/stop lifecycle and can be triggered with `/mevent start <id>`.
 
 ## Commands
 
