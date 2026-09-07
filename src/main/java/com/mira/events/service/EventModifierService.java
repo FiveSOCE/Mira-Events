@@ -47,7 +47,9 @@ public final class EventModifierService implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onNaturalSpawn(CreatureSpawnEvent event) {
         if (!active.contains("mob-frenzy")) return;
-        if (event.getSpawnReason() != CreatureSpawnEvent.SpawnReason.NATURAL) return;
+        CreatureSpawnEvent.SpawnReason reason = event.getSpawnReason();
+        if (reason != CreatureSpawnEvent.SpawnReason.NATURAL
+                && reason != CreatureSpawnEvent.SpawnReason.SPAWNER) return;
         if (!(event.getEntity() instanceof Monster)) return;
 
         double chance = clamp(plugin.eventsConfig().getDouble("events.mob-frenzy.modifier.extra-spawn-chance", 0.50D));
