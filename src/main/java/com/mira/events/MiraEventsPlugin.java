@@ -9,6 +9,7 @@ import com.mira.events.api.event.MiraEventStartedEvent;
 import com.mira.events.api.event.MiraEventStoppedEvent;
 import com.mira.events.service.AnnouncementService;
 import com.mira.events.service.RestartService;
+import com.mira.events.service.EventModifierService;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -35,6 +36,7 @@ public final class MiraEventsPlugin extends JavaPlugin implements TabExecutor, M
     private YamlConfiguration stateConfig;
     private AnnouncementService announcements;
     private RestartService restarts;
+    private EventModifierService modifiers;
 
     @Override
     public void onEnable() {
@@ -46,6 +48,8 @@ public final class MiraEventsPlugin extends JavaPlugin implements TabExecutor, M
         reloadDefinitions();
         announcements = new AnnouncementService(this, core);
         restarts = new RestartService(this, core);
+        modifiers = new EventModifierService(this);
+        getServer().getPluginManager().registerEvents(modifiers, this);
 
         var command = Objects.requireNonNull(getCommand("miraevent"), "miraevent command missing");
         command.setExecutor(this);
@@ -56,6 +60,7 @@ public final class MiraEventsPlugin extends JavaPlugin implements TabExecutor, M
         core.modules().setHealth(this, ModuleHealth.HEALTHY,
                 "Events, rotating announcements and safe restart scheduling ready");
         if (getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) new EventsExpansion().register();
+        Bukkit.getScheduler().runTask(this, () -> modifiers.syncActive(activeEventIds()));
 
         long ticks = Math.max(1L, getConfig().getLong("tick-seconds", 1L)) * 20L;
         Bukkit.getScheduler().runTaskTimer(this, this::tick, ticks, ticks);
@@ -64,6 +69,7 @@ public final class MiraEventsPlugin extends JavaPlugin implements TabExecutor, M
 
     @Override
     public void onDisable() {
+        if (modifiers != null) modifiers.shutdown();
         saveState();
         getServer().getServicesManager().unregisterAll(this);
         if (core != null) {
@@ -71,6 +77,8 @@ public final class MiraEventsPlugin extends JavaPlugin implements TabExecutor, M
             core.modules().unregister(this);
         }
     }
+
+    public YamlConfiguration eventsConfig() { return eventsConfig; }
 
     private void reloadDefinitions() {
         eventsConfig = YamlConfiguration.loadConfiguration(eventsFile);
