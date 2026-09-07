@@ -24,6 +24,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public final class MiraEventsPlugin extends JavaPlugin implements TabExecutor, MiraEventsApi {
@@ -45,6 +47,7 @@ public final class MiraEventsPlugin extends JavaPlugin implements TabExecutor, M
         if (!new File(getDataFolder(), "events.yml").exists()) saveResource("events.yml", false);
         eventsFile = new File(getDataFolder(), "events.yml");
         stateFile = new File(getDataFolder(), "state.yml");
+        mergeBundledEventPresets();
         reloadDefinitions();
         announcements = new AnnouncementService(this, core);
         restarts = new RestartService(this, core);
@@ -79,6 +82,40 @@ public final class MiraEventsPlugin extends JavaPlugin implements TabExecutor, M
     }
 
     public YamlConfiguration eventsConfig() { return eventsConfig; }
+
+    private void mergeBundledEventPresets() {
+        if (eventsFile == null) return;
+        try (var input = getResource("events.yml")) {
+            if (input == null) return;
+
+            YamlConfiguration bundled = YamlConfiguration.loadConfiguration(
+                    new InputStreamReader(input, StandardCharsets.UTF_8));
+            ConfigurationSection defaults = bundled.getConfigurationSection("events");
+            if (defaults == null) return;
+
+            YamlConfiguration live = YamlConfiguration.loadConfiguration(eventsFile);
+            boolean changed = false;
+
+            for (String eventId : defaults.getKeys(false)) {
+                String base = "events." + eventId;
+                if (live.isConfigurationSection(base)) continue;
+
+                ConfigurationSection preset = defaults.getConfigurationSection(eventId);
+                if (preset == null) continue;
+
+                for (Map.Entry<String, Object> entry : preset.getValues(true).entrySet()) {
+                    if (entry.getValue() instanceof ConfigurationSection) continue;
+                    live.set(base + "." + entry.getKey(), entry.getValue());
+                }
+                changed = true;
+                getLogger().info("Added missing bundled Mira event preset: " + eventId);
+            }
+
+            if (changed) live.save(eventsFile);
+        } catch (IOException ex) {
+            getLogger().severe("Could not merge bundled Mira event presets: " + ex.getMessage());
+        }
+    }
 
     private void reloadDefinitions() {
         eventsConfig = YamlConfiguration.loadConfiguration(eventsFile);
@@ -285,6 +322,7 @@ public final class MiraEventsPlugin extends JavaPlugin implements TabExecutor, M
         if (!sender.hasPermission("miraevents.admin")) { msg(sender, "&cYou do not have permission."); return true; }
         if (args[0].equalsIgnoreCase("reload")) {
             reloadConfig();
+            mergeBundledEventPresets();
             reloadDefinitions();
             if (announcements != null) announcements.reload();
             if (restarts != null) restarts.reload();
