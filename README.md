@@ -1,10 +1,25 @@
 # MiraEvents
 
+## Prefilled event migration (0.2.2)
+
+Existing servers now receive Mira's bundled event presets automatically. On startup and `/mevent reload`, MiraEvents compares the live `plugins/MiraEvents/events.yml` against the bundled defaults and inserts any **missing event IDs**.
+
+The migration is non-destructive: if an event ID already exists, none of its custom values are overwritten.
+
+Bundled presets:
+
+- `enhanced-airdrops`
+- `mega-pinata`
+- `mob-frenzy`
+- `harvest-rush`
+- disabled `example-sale`
+
+
 MiraEvents is the central scheduled-event and server-operations controller for the Mira Paper server suite. It manages recurring/manually triggered gameplay events, rotating announcements, countdowns, persistent event state, command chains, and safe server restart scheduling.
 
 ## Download
 
-[**Download MiraEvents v0.2.1**](https://github.com/FiveSOCE/Mira-Events/releases/download/v0.2.1/MiraEvents-0.2.1.jar)
+[**Download MiraEvents v0.2.2**](https://github.com/FiveSOCE/Mira-Events/releases/download/v0.2.2/MiraEvents-0.2.2.jar)
 
 [View All Releases](https://github.com/FiveSOCE/Mira-Events/releases)
 
