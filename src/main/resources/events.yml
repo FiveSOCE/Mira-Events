@@ -1,4 +1,63 @@
 events:
+  enhanced-airdrops:
+    display-name: "Enhanced Airdrops"
+    enabled: true
+    duration-seconds: 900
+    first-start-at: 0
+    repeat-minutes: 0
+    countdown-seconds: [60, 30, 10, 5, 4, 3, 2, 1]
+    start-broadcast: "&d&lEnhanced Airdrops &7has begun! &fMore crates and richer caches are inbound."
+    end-broadcast: "&7Enhanced Airdrops has ended."
+    start-commands: []
+    end-commands: []
+    modifier:
+      min-crates: 35
+      max-crates: 50
+      min-loot-items: 3
+      max-loot-items: 5
+
+  mega-pinata:
+    display-name: "Mega Pinata"
+    enabled: true
+    duration-seconds: 1200
+    first-start-at: 0
+    repeat-minutes: 0
+    countdown-seconds: [60, 30, 10, 5, 4, 3, 2, 1]
+    start-broadcast: "&6&lMega Pinata &7is coming! &fThis one can take a beating."
+    end-broadcast: "&7Mega Pinata event has ended."
+    start-commands: []
+    end-commands: []
+    modifier:
+      hits: 750
+
+  mob-frenzy:
+    display-name: "Mob Frenzy"
+    enabled: true
+    duration-seconds: 1800
+    first-start-at: 0
+    repeat-minutes: 0
+    countdown-seconds: [60, 30, 10, 5, 4, 3, 2, 1]
+    start-broadcast: "&c&lMob Frenzy &7has begun! &fNatural hostile spawns are surging."
+    end-broadcast: "&7Mob Frenzy has ended."
+    start-commands: []
+    end-commands: []
+    modifier:
+      extra-spawn-chance: 0.50
+
+  harvest-rush:
+    display-name: "Harvest Rush"
+    enabled: true
+    duration-seconds: 1800
+    first-start-at: 0
+    repeat-minutes: 0
+    countdown-seconds: [60, 30, 10, 5, 4, 3, 2, 1]
+    start-broadcast: "&a&lHarvest Rush &7has begun! &fCrops are growing faster."
+    end-broadcast: "&7Harvest Rush has ended."
+    start-commands: []
+    end-commands: []
+    modifier:
+      extra-growth-chance: 0.65
+
   example-sale:
     display-name: "Weekend Sale"
     enabled: false
