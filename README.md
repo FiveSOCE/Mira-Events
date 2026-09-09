@@ -1,5 +1,13 @@
 # MiraEvents
 
+## Download
+
+**Latest compatibility release: v0.2.3**
+
+[**Download MiraEvents-0.2.3.jar**](https://github.com/FiveSOCE/Mira-Events/releases/download/v0.2.3/MiraEvents-0.2.3.jar)
+
+[View all releases](https://github.com/FiveSOCE/Mira-Events/releases)
+
 ## Prefilled event migration (0.2.2)
 
 Existing servers now receive Mira's bundled event presets automatically. On startup and `/mevent reload`, MiraEvents compares the live `plugins/MiraEvents/events.yml` against the bundled defaults and inserts any **missing event IDs**.
@@ -16,12 +24,6 @@ Bundled presets:
 
 
 MiraEvents is the central scheduled-event and server-operations controller for the Mira Paper server suite. It manages recurring/manually triggered gameplay events, rotating announcements, countdowns, persistent event state, command chains, and safe server restart scheduling.
-
-## Download
-
-[**Download MiraEvents v0.2.2**](https://github.com/FiveSOCE/Mira-Events/releases/download/v0.2.3/MiraEvents-0.2.3.jar)
-
-[View All Releases](https://github.com/FiveSOCE/Mira-Events/releases)
 
 ## Requirements / Dependencies
 
